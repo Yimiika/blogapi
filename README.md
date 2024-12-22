@@ -1,5 +1,6 @@
 
 Blog API
+
 This is a RESTful API for managing blogs, built with Node.js, Express, MongoDB, and Mongoose. The API allows users to create, retrieve, and manage blog posts. It supports user authentication and provides CRUD operations for blogs.
 
 Features
