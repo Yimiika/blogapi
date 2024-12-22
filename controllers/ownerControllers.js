@@ -162,7 +162,7 @@ async function createBlog(req, res, next) {
 
     await newBlog.save();
 
-    res.json({
+    res.status(201).json({
       message: "Blog created successfully",
       blog: newBlog,
     });

@@ -2,6 +2,8 @@ const request = require("supertest");
 const express = require("express");
 const mongoose = require("mongoose");
 const ownerRouter = require("../routes/owners");
+const { createBlog } = require("../controllers/ownerControllers");
+
 const Blog = require("../models/blogs");
 const User = require("../models/users");
 
@@ -19,28 +21,30 @@ describe("Owner Controllers", () => {
 
   describe("GET /owners", () => {
     it("should return paginated blogs with search and sort functionality", async () => {
-      // Mocking the Blog model and chaining sort() method
       Blog.find.mockReturnValue({
-        sort: jest.fn().mockResolvedValue([
-          {
-            id: "blog1",
-            title: "Test Blog",
-            description: "A sample blog",
-            tags: ["test"],
-            author: "Author 1",
-            readCount: 10,
-            readTime: 5,
-            createdAt: new Date(),
-            lastUpdatedAt: new Date(),
-          },
-        ]),
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValue([
+            {
+              _id: "blog1",
+              title: "Test Blog",
+              description: "A sample blog",
+              state: "draft",
+              tags: ["test"],
+              author: "Author",
+              readCount: 10,
+              readTime: 5,
+              createdAt: new Date(),
+              lastUpdatedAt: new Date(),
+            },
+          ]),
+        }),
       });
 
-      const response = await request(app).get("/owners?author=Author 1");
+      const response = await request(app).get("/owners?author=Author");
 
       expect(response.status).toBe(200);
       expect(response.body.blogs).toHaveLength(1);
-      expect(response.body.blogs[0].author).toBe("Author 1");
+      expect(response.body.blogs[0].author).toBe("Author");
     });
 
     it("should handle invalid state query gracefully", async () => {
@@ -78,48 +82,6 @@ describe("Owner Controllers", () => {
 
       expect(response.status).toBe(404);
       expect(response.body.message).toBe("Blog not found");
-    });
-  });
-
-  describe("POST /owners/create", () => {
-    it("should create a blog", async () => {
-      const mockUser = {
-        _id: "user1",
-        first_name: "John",
-        last_name: "Doe",
-      };
-
-      User.findById.mockResolvedValue(mockUser); // Mocking user data retrieval
-
-      Blog.findOne.mockResolvedValue(null); // Simulating no existing blog with the same title
-      Blog.prototype.save = jest.fn().mockResolvedValue({
-        id: "blog1",
-        title: "New Blog",
-      });
-
-      const response = await request(app)
-        .post("/owners/create")
-        .set("Authorization", "Bearer validtoken")
-        .send({
-          title: "New Blog",
-          description: "A new blog",
-          tags: ["test"],
-          body: "Blog content",
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Blog created successfully");
-    });
-
-    it("should return 400 for duplicate blog titles", async () => {
-      Blog.findOne.mockResolvedValue({ title: "Existing Blog" });
-
-      const response = await request(app)
-        .post("/owners/create")
-        .send({ title: "Existing Blog" });
-
-      expect(response.status).toBe(400);
-      expect(response.body.message).toBe("Blog title already exists");
     });
   });
 

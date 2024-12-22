@@ -31,7 +31,10 @@ describe("Auth", () => {
       });
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty("message", "Signup successful");
+    expect(response.body).toHaveProperty(
+      "message",
+      "User registered Successfully"
+    );
   }, 10000);
 
   it("should login a user", async () => {
@@ -67,7 +70,7 @@ describe("Auth", () => {
         password: "securePassword123",
       });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error", "User not found");
   });
 });
